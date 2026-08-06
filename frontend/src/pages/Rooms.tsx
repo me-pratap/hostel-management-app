@@ -8,8 +8,8 @@ interface Room {
   room_number: string;
   floor: string;
   room_type: string;
-  capacity: int;
-  occupant_count: int;
+  capacity: number;
+  occupant_count: number;
   is_occupied: boolean;
 }
 
