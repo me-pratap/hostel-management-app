@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from database import connect_db, close_db
-from config import UPLOAD_DIR
+from config import UPLOAD_DIR, FRONTEND_URL
 from routers import auth_router, rooms, tenants, payments, reminders, whatsapp_router
 
 
@@ -53,10 +53,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS - allow frontend dev server
+# CORS - allow frontend dev server and production Vercel URL
+# We add variants with and without trailing slash just in case the env var was misconfigured
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=[FRONTEND_URL, FRONTEND_URL.rstrip("/"), FRONTEND_URL.rstrip("/") + "/", "http://localhost:5173", "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
