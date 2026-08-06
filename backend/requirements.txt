@@ -6,3 +6,5 @@ python-dotenv
 apscheduler
 httpx
 python-multipart
+python-dateutil
+certifi
