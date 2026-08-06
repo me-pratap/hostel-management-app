@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Upload } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Upload } from 'lucide-react';
 import apiClient from '../api/client';
 
-export const AddTenant = () => {
+export const EditTenant = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [rooms, setRooms] = useState<any[]>([]);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [aadharPreview, setAadharPreview] = useState<string | null>(null);
@@ -15,32 +17,71 @@ export const AddTenant = () => {
   const [formData, setFormData] = useState({
     full_name: '',
     contact_number: '',
+    alternate_contact_number: '',
     dob: '',
     gender: 'male',
     blood_group: '',
     aadhar_number: '',
     emergency_contact_name: '',
     emergency_contact_number: '',
+    parents_contact_number: '',
     local_guardian_name: '',
     local_guardian_contact: '',
     home_address: '',
+    occupation_or_work: '',
+    vehicle_number: '',
     room_id: '',
+    bed_slot_number: '',
     monthly_rent_amount: '',
     rent_due_day: '5',
-    police_verification_status: 'pending'
+    police_verification_status: 'pending',
+    payment_mode_preference: '',
+    notes: ''
   });
 
   useEffect(() => {
-    const fetchRooms = async () => {
+    const load = async () => {
       try {
-        const res = await apiClient.get('/rooms');
-        setRooms(res.data);
+        const [tenantRes, roomsRes] = await Promise.all([
+          apiClient.get(`/tenants/${id}`),
+          apiClient.get('/rooms')
+        ]);
+        const t = tenantRes.data;
+        setRooms(roomsRes.data);
+        setFormData({
+          full_name: t.full_name || '',
+          contact_number: t.contact_number || '',
+          alternate_contact_number: t.alternate_contact_number || '',
+          dob: t.dob || '',
+          gender: t.gender || 'male',
+          blood_group: t.blood_group || '',
+          aadhar_number: t.aadhar_number || '',
+          emergency_contact_name: t.emergency_contact_name || '',
+          emergency_contact_number: t.emergency_contact_number || '',
+          parents_contact_number: t.parents_contact_number || '',
+          local_guardian_name: t.local_guardian_name || '',
+          local_guardian_contact: t.local_guardian_contact || '',
+          home_address: t.home_address || '',
+          occupation_or_work: t.occupation_or_work || '',
+          vehicle_number: t.vehicle_number || '',
+          room_id: t.room_id || '',
+          bed_slot_number: t.bed_slot_number?.toString() || '',
+          monthly_rent_amount: t.monthly_rent_amount?.toString() || '',
+          rent_due_day: t.rent_due_day?.toString() || '5',
+          police_verification_status: t.police_verification_status || 'pending',
+          payment_mode_preference: t.payment_mode_preference || '',
+          notes: t.notes || ''
+        });
+        if (t.photo_url) setPhotoPreview(`http://localhost:8000${t.photo_url}`);
+        if (t.aadhar_photo_url) setAadharPreview(`http://localhost:8000${t.aadhar_photo_url}`);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchRooms();
-  }, []);
+    load();
+  }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -70,14 +111,11 @@ export const AddTenant = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setSaving(true);
     try {
-      const payload: any = {
-        ...formData,
-        monthly_rent_amount: parseFloat(formData.monthly_rent_amount),
-        rent_due_day: parseInt(formData.rent_due_day)
-      };
+      const payload: any = { ...formData };
 
+      // Upload new photos if selected
       if (photoFile) {
         payload.photo_url = await uploadFile(photoFile);
       }
@@ -85,13 +123,25 @@ export const AddTenant = () => {
         payload.aadhar_photo_url = await uploadFile(aadharFile);
       }
 
-      await apiClient.post('/tenants', payload);
-      navigate('/tenants');
+      // Convert numeric fields
+      if (payload.monthly_rent_amount) payload.monthly_rent_amount = parseFloat(payload.monthly_rent_amount);
+      if (payload.rent_due_day) payload.rent_due_day = parseInt(payload.rent_due_day);
+      if (payload.bed_slot_number) payload.bed_slot_number = parseInt(payload.bed_slot_number);
+
+      // Remove empty strings (backend rejects them as "no fields to update")
+      Object.keys(payload).forEach(key => {
+        if (payload[key] === '') delete payload[key];
+      });
+
+      await apiClient.put(`/tenants/${id}`, payload);
+      navigate(`/tenants/${id}`);
     } catch (err: any) {
-      alert(err.response?.data?.detail || 'Failed to add tenant');
-      setLoading(false);
+      alert(err.response?.data?.detail || 'Failed to update');
+      setSaving(false);
     }
   };
+
+  if (loading) return <div style={{ color: 'var(--text-muted)' }}>Loading...</div>;
 
   const PhotoUploadBox = ({ label, preview, onChange }: { label: string; preview: string | null; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
     <div className="form-group">
@@ -118,14 +168,18 @@ export const AddTenant = () => {
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '32px' }}>
-        <h1 style={{ margin: '0 0 8px 0', fontSize: '2rem' }}>Onboard New Tenant</h1>
-        <p style={{ color: 'var(--text-muted)' }}>Enter the resident's full details below to complete onboarding.</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
+        <button onClick={() => navigate(`/tenants/${id}`)} className="btn-icon" style={{ width: 'auto', borderRadius: 'var(--radius-full)', padding: '0 20px', gap: '8px', display: 'flex', alignItems: 'center' }}>
+          <ArrowLeft size={18} /> Back
+        </button>
+        <div>
+          <h1 style={{ margin: '0 0 4px', fontSize: '2rem' }}>Edit Tenant</h1>
+          <p style={{ color: 'var(--text-muted)', margin: 0 }}>Update {formData.full_name}'s profile details.</p>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit}>
-
-        {/* SECTION 0: Photos */}
+        {/* Photos */}
         <div className="form-section">
           <div className="form-section-title">Photos</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
@@ -133,21 +187,19 @@ export const AddTenant = () => {
             <PhotoUploadBox label="Aadhar Card Photo" preview={aadharPreview} onChange={(e) => handleFileChange(e, 'aadhar')} />
           </div>
         </div>
-        
-        {/* SECTION 1: Personal Info */}
+
+        {/* Personal Information */}
         <div className="form-section">
-          <div className="form-section-title">1. Personal Information</div>
+          <div className="form-section-title">Personal Information</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px' }}>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label>Full Name *</label>
-              <input required name="full_name" value={formData.full_name} onChange={handleChange} placeholder="e.g. John Doe" />
+              <input required name="full_name" value={formData.full_name} onChange={handleChange} />
             </div>
-            
             <div className="form-group">
               <label>Date of Birth</label>
               <input type="date" name="dob" value={formData.dob} onChange={handleChange} />
             </div>
-
             <div className="form-group">
               <label>Gender</label>
               <select name="gender" value={formData.gender} onChange={handleChange}>
@@ -156,58 +208,67 @@ export const AddTenant = () => {
                 <option value="other">Other</option>
               </select>
             </div>
-
             <div className="form-group">
               <label>Blood Group</label>
               <input name="blood_group" value={formData.blood_group} onChange={handleChange} placeholder="e.g. O+" />
             </div>
-
             <div className="form-group">
               <label>Aadhar Number</label>
               <input name="aadhar_number" value={formData.aadhar_number} onChange={handleChange} placeholder="12-digit number" />
             </div>
+            <div className="form-group">
+              <label>Occupation / Work</label>
+              <input name="occupation_or_work" value={formData.occupation_or_work} onChange={handleChange} />
+            </div>
+            <div className="form-group">
+              <label>Vehicle Number</label>
+              <input name="vehicle_number" value={formData.vehicle_number} onChange={handleChange} placeholder="e.g. KA-01-AB-1234" />
+            </div>
           </div>
         </div>
 
-        {/* SECTION 2: Contacts */}
+        {/* Contacts */}
         <div className="form-section">
-          <div className="form-section-title">2. Contact & Emergency</div>
+          <div className="form-section-title">Contact & Emergency</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px' }}>
-            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label>Primary Contact Number *</label>
-              <input required name="contact_number" value={formData.contact_number} onChange={handleChange} placeholder="+91 XXXXX XXXXX" />
+            <div className="form-group">
+              <label>Primary Contact *</label>
+              <input required name="contact_number" value={formData.contact_number} onChange={handleChange} />
             </div>
-
+            <div className="form-group">
+              <label>Alternate Contact</label>
+              <input name="alternate_contact_number" value={formData.alternate_contact_number} onChange={handleChange} />
+            </div>
             <div className="form-group">
               <label>Emergency Contact Name</label>
               <input name="emergency_contact_name" value={formData.emergency_contact_name} onChange={handleChange} />
             </div>
-
             <div className="form-group">
               <label>Emergency Contact Number</label>
               <input name="emergency_contact_number" value={formData.emergency_contact_number} onChange={handleChange} />
             </div>
-
+            <div className="form-group">
+              <label>Parents Contact</label>
+              <input name="parents_contact_number" value={formData.parents_contact_number} onChange={handleChange} />
+            </div>
             <div className="form-group">
               <label>Local Guardian Name</label>
               <input name="local_guardian_name" value={formData.local_guardian_name} onChange={handleChange} />
             </div>
-
             <div className="form-group">
               <label>Local Guardian Contact</label>
               <input name="local_guardian_contact" value={formData.local_guardian_contact} onChange={handleChange} />
             </div>
-            
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label>Home Address</label>
-              <textarea name="home_address" value={formData.home_address} onChange={handleChange} rows={3} placeholder="Full permanent address" />
+              <textarea name="home_address" value={formData.home_address} onChange={handleChange} rows={3} />
             </div>
           </div>
         </div>
 
-        {/* SECTION 3: Hostel Details */}
+        {/* Hostel Details */}
         <div className="form-section">
-          <div className="form-section-title">3. Hostel & Rent Details</div>
+          <div className="form-section-title">Hostel & Rent</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px' }}>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label>Assign Room *</label>
@@ -220,32 +281,41 @@ export const AddTenant = () => {
                 ))}
               </select>
             </div>
-
             <div className="form-group">
-              <label>Monthly Rent Amount *</label>
-              <input required type="number" name="monthly_rent_amount" value={formData.monthly_rent_amount} onChange={handleChange} placeholder="e.g. 5000" />
+              <label>Bed Slot Number</label>
+              <input type="number" name="bed_slot_number" value={formData.bed_slot_number} onChange={handleChange} />
             </div>
-
+            <div className="form-group">
+              <label>Monthly Rent *</label>
+              <input required type="number" name="monthly_rent_amount" value={formData.monthly_rent_amount} onChange={handleChange} />
+            </div>
             <div className="form-group">
               <label>Rent Due Day (1-31)</label>
-              <input required type="number" min="1" max="31" name="rent_due_day" value={formData.rent_due_day} onChange={handleChange} />
+              <input type="number" min="1" max="31" name="rent_due_day" value={formData.rent_due_day} onChange={handleChange} />
             </div>
-
-            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label>Police Verification Status</label>
+            <div className="form-group">
+              <label>Police Verification</label>
               <select name="police_verification_status" value={formData.police_verification_status} onChange={handleChange}>
                 <option value="pending">Pending</option>
                 <option value="done">Done</option>
                 <option value="not_required">Not Required</option>
               </select>
             </div>
+            <div className="form-group">
+              <label>Payment Mode Preference</label>
+              <input name="payment_mode_preference" value={formData.payment_mode_preference} onChange={handleChange} placeholder="e.g. UPI, Cash" />
+            </div>
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label>Notes</label>
+              <textarea name="notes" value={formData.notes} onChange={handleChange} rows={3} />
+            </div>
           </div>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
-          <button type="button" onClick={() => navigate('/tenants')} className="btn-icon" style={{ width: 'auto', padding: '0 24px', borderRadius: 'var(--radius-full)' }}>Cancel</button>
-          <button type="submit" disabled={loading} className="btn-primary" style={{ padding: '16px 40px', fontSize: '1.125rem' }}>
-            {loading ? 'Onboarding...' : 'Complete Onboarding'}
+          <button type="button" onClick={() => navigate(`/tenants/${id}`)} className="btn-icon" style={{ width: 'auto', padding: '0 24px', borderRadius: 'var(--radius-full)' }}>Cancel</button>
+          <button type="submit" disabled={saving} className="btn-primary" style={{ padding: '16px 40px', fontSize: '1.125rem' }}>
+            {saving ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
       </form>

@@ -134,6 +134,8 @@ async def record_payment(payment_id: str, data: RecordPaymentRequest):
 
     updated = await db.payments.find_one({"payment_id": payment_id})
     updated.pop("_id", None)
+
+
     return updated
 
 

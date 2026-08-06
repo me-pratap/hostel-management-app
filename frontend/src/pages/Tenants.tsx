@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { UserPlus, Phone, Home, FileText } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import apiClient from '../api/client';
 
 interface Tenant {
   tenant_id: string;
   full_name: string;
+  photo_url?: string;
   contact_number: string;
   room_id: string;
   monthly_rent_amount: number;
@@ -16,6 +17,7 @@ interface Tenant {
 export const Tenants = () => {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchTenants = async () => {
@@ -34,6 +36,8 @@ export const Tenants = () => {
   if (loading) {
     return <div style={{ color: 'var(--text-muted)' }}>Loading tenants...</div>;
   }
+
+  const backendBase = 'http://localhost:8000';
 
   return (
     <div>
@@ -55,18 +59,34 @@ export const Tenants = () => {
         gap: '24px'
       }}>
         {tenants.map(tenant => (
-          <div key={tenant.tenant_id} className="stat-card" style={{ padding: '24px' }}>
+          <div
+            key={tenant.tenant_id}
+            className="stat-card"
+            style={{ padding: '24px', cursor: 'pointer' }}
+            onClick={() => navigate(`/tenants/${tenant.tenant_id}`)}
+          >
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
-              <div style={{
-                width: '64px', height: '64px',
-                borderRadius: '50%',
-                background: 'var(--accent-glow)',
-                color: 'var(--accent-primary)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '1.5rem', fontWeight: 'bold', border: '1px solid var(--accent-primary)'
-              }}>
-                {tenant.full_name.charAt(0).toUpperCase()}
-              </div>
+              {tenant.photo_url ? (
+                <img
+                  src={`${backendBase}${tenant.photo_url}`}
+                  alt={tenant.full_name}
+                  style={{
+                    width: '64px', height: '64px', borderRadius: '50%',
+                    objectFit: 'cover', border: '2px solid var(--accent-primary)'
+                  }}
+                />
+              ) : (
+                <div style={{
+                  width: '64px', height: '64px',
+                  borderRadius: '50%',
+                  background: 'var(--accent-glow)',
+                  color: 'var(--accent-primary)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '1.5rem', fontWeight: 'bold', border: '1px solid var(--accent-primary)'
+                }}>
+                  {tenant.full_name.charAt(0).toUpperCase()}
+                </div>
+              )}
               <div>
                 <h3 style={{ margin: '0 0 4px 0', fontSize: '1.25rem' }}>{tenant.full_name}</h3>
                 <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>

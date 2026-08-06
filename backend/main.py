@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from database import connect_db, close_db
 from config import UPLOAD_DIR
-from routers import auth_router, rooms, tenants, payments, reminders
+from routers import auth_router, rooms, tenants, payments, reminders, whatsapp_router
 
 
 scheduler = AsyncIOScheduler()
@@ -71,6 +71,7 @@ app.include_router(rooms.router)
 app.include_router(tenants.router)
 app.include_router(payments.router)
 app.include_router(reminders.router)
+app.include_router(whatsapp_router.router)
 
 
 @app.get("/api/health")
