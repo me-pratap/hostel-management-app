@@ -120,10 +120,12 @@ export const TenantProfile = () => {
   const verificationColor = tenant.police_verification_status === 'done' ? '#10b981' : tenant.police_verification_status === 'pending' ? '#f59e0b' : 'var(--text-muted)';
 
   const InfoRow = ({ icon: Icon, label, value }: { icon: any; label: string; value?: string | number | null }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-      <Icon size={18} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
-      <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem', minWidth: '140px' }}>{label}</span>
-      <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{value || '—'}</span>
+    <div className="info-row">
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginTop: '2px' }}>
+        <Icon size={18} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+        <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{label}</span>
+      </div>
+      <span className="info-row-val">{value || '—'}</span>
     </div>
   );
 
