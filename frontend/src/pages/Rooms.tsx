@@ -66,11 +66,7 @@ export const Rooms = () => {
           {rooms.length} Rooms
         </span>
       </h2>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-        gap: '24px'
-      }}>
+      <div className="grid-cards">
         {rooms.map(room => (
           <div key={room.room_id} className="stat-card" style={{ padding: '24px', cursor: room.room_type === 'rent' ? 'pointer' : 'default' }} onClick={() => room.room_type === 'rent' && handleRoomClick(room.room_id)}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>

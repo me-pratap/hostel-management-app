@@ -148,7 +148,7 @@ export const TenantProfile = () => {
 
       {/* Header Card */}
       <div className="form-section" style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+        <div className="profile-header">
           {/* Profile Photo */}
           <div style={{ position: 'relative' }}>
             {tenant.photo_url ? (

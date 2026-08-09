@@ -40,7 +40,7 @@ export const Tenants = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+      <div className="header-actions">
         <div>
           <h1 style={{ margin: '0 0 8px 0', fontSize: '2rem' }}>Tenants</h1>
           <p style={{ color: 'var(--text-muted)' }}>Manage all active hostel residents.</p>
@@ -52,11 +52,7 @@ export const Tenants = () => {
         </Link>
       </div>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-        gap: '24px'
-      }}>
+      <div className="grid-cards">
         {tenants.map(tenant => (
           <div
             key={tenant.tenant_id}

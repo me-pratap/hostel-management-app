@@ -110,7 +110,7 @@ export const Payments = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+      <div className="header-actions">
         <div>
           <h1 style={{ margin: '0 0 8px 0', fontSize: '2rem' }}>Payments & Billing</h1>
           <p style={{ color: 'var(--text-muted)' }}>Overview for {summary?.month || 'Current Month'}</p>
@@ -127,12 +127,7 @@ export const Payments = () => {
       </div>
 
       {/* Financial Summary Cards */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-        gap: '24px',
-        marginBottom: '40px'
-      }}>
+      <div className="grid-cards" style={{ marginBottom: '40px' }}>
         
         <div className="stat-card" style={{ borderTop: '4px solid #38bdf8' }}>
           <div className="stat-title">Total Due</div>
