@@ -39,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password: passwordInput,
     });
     if (response.status === 200) {
+      localStorage.setItem('auth_token', response.data.token);
       setIsAuthenticated(true);
       setUsername(response.data.username);
     }
@@ -50,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Logout failed', error);
     } finally {
+      localStorage.removeItem('auth_token');
       setIsAuthenticated(false);
       setUsername(null);
     }

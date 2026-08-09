@@ -28,7 +28,7 @@ async def login(request: LoginRequest, response: Response):
         max_age=86400 * 7,  # 7 days
     )
 
-    return {"message": "Login successful", "username": request.username}
+    return {"message": "Login successful", "username": request.username, "token": session_id}
 
 
 @router.post("/logout")
@@ -56,6 +56,11 @@ from fastapi import Request as FastAPIRequest
 async def check_auth(request: FastAPIRequest):
     """Check if the current session is valid."""
     session_id = request.cookies.get("session_id")
+    if not session_id:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            session_id = auth_header.split(" ")[1]
+
     if not session_id:
         raise HTTPException(status_code=401, detail="Not authenticated")
 

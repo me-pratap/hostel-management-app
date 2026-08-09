@@ -38,6 +38,11 @@ async def get_current_user(request: Request):
     """Dependency: extract and validate the session from cookies."""
     session_id = request.cookies.get("session_id")
     if not session_id:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            session_id = auth_header.split(" ")[1]
+
+    if not session_id:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     session = get_session(session_id)
