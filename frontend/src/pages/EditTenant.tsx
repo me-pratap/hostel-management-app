@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Upload } from 'lucide-react';
-import apiClient from '../api/client';
+import apiClient, { getImageUrl } from '../api/client';
 
 export const EditTenant = () => {
   const { id } = useParams<{ id: string }>();
@@ -72,8 +72,8 @@ export const EditTenant = () => {
           payment_mode_preference: t.payment_mode_preference || '',
           notes: t.notes || ''
         });
-        if (t.photo_url) setPhotoPreview(`http://localhost:8000${t.photo_url}`);
-        if (t.aadhar_photo_url) setAadharPreview(`http://localhost:8000${t.aadhar_photo_url}`);
+        if (t.photo_url) setPhotoPreview(getImageUrl(t.photo_url));
+        if (t.aadhar_photo_url) setAadharPreview(getImageUrl(t.aadhar_photo_url));
       } catch (err) {
         console.error(err);
       } finally {

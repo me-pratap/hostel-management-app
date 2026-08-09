@@ -5,7 +5,7 @@ import {
   Shield, MessageCircle, UserX, Upload, FileText, Heart,
   User, Home, Car
 } from 'lucide-react';
-import apiClient from '../api/client';
+import apiClient, { getImageUrl } from '../api/client';
 
 interface TenantData {
   tenant_id: string;
@@ -117,7 +117,6 @@ export const TenantProfile = () => {
   if (loading) return <div style={{ color: 'var(--text-muted)' }}>Loading profile...</div>;
   if (!tenant) return <div style={{ color: '#ef4444' }}>Tenant not found.</div>;
 
-  const backendBase = 'http://localhost:8000';
   const verificationColor = tenant.police_verification_status === 'done' ? '#10b981' : tenant.police_verification_status === 'pending' ? '#f59e0b' : 'var(--text-muted)';
 
   const InfoRow = ({ icon: Icon, label, value }: { icon: any; label: string; value?: string | number | null }) => (
@@ -154,7 +153,7 @@ export const TenantProfile = () => {
           <div style={{ position: 'relative' }}>
             {tenant.photo_url ? (
               <img
-                src={`${backendBase}${tenant.photo_url}`}
+                src={getImageUrl(tenant.photo_url)}
                 alt={tenant.full_name}
                 style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--accent-primary)' }}
               />
@@ -264,7 +263,7 @@ export const TenantProfile = () => {
           {tenant.aadhar_photo_url ? (
             <>
               <img
-                src={`${backendBase}${tenant.aadhar_photo_url}`}
+                src={getImageUrl(tenant.aadhar_photo_url)}
                 alt="Aadhar Card"
                 onClick={() => setShowAadhar(!showAadhar)}
                 style={{

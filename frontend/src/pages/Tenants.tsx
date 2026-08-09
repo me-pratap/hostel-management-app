@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { UserPlus, Phone, Home, FileText } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import apiClient from '../api/client';
+import apiClient, { getImageUrl } from '../api/client';
 
 interface Tenant {
   tenant_id: string;
@@ -37,7 +37,6 @@ export const Tenants = () => {
     return <div style={{ color: 'var(--text-muted)' }}>Loading tenants...</div>;
   }
 
-  const backendBase = 'http://localhost:8000';
 
   return (
     <div>
@@ -68,7 +67,7 @@ export const Tenants = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
               {tenant.photo_url ? (
                 <img
-                  src={`${backendBase}${tenant.photo_url}`}
+                  src={getImageUrl(tenant.photo_url)}
                   alt={tenant.full_name}
                   style={{
                     width: '64px', height: '64px', borderRadius: '50%',
