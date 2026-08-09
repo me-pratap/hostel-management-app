@@ -224,6 +224,7 @@ body::after {
   }
   
   .sidebar nav {
+    display: flex !important;
     flex-direction: row !important;
     justify-content: space-around !important;
     width: 100%;
