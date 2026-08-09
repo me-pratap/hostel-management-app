@@ -130,17 +130,17 @@ export const TenantProfile = () => {
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto' }}>
       {/* Back + Actions Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div className="header-actions">
         <button onClick={() => navigate('/tenants')} className="btn-icon" style={{ width: 'auto', borderRadius: 'var(--radius-full)', padding: '0 20px', gap: '8px', display: 'flex', alignItems: 'center' }}>
           <ArrowLeft size={18} /> Back
         </button>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <Link to={`/tenants/${tenant.tenant_id}/edit`}>
-            <button className="btn-icon" style={{ width: 'auto', borderRadius: 'var(--radius-full)', padding: '0 20px', gap: '8px', display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '12px', width: '100%', justifyContent: 'center' }}>
+          <Link to={`/tenants/${tenant.tenant_id}/edit`} style={{ flex: 1 }}>
+            <button className="btn-icon" style={{ width: '100%', borderRadius: 'var(--radius-full)', padding: '0 20px', gap: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Edit size={16} /> Edit
             </button>
           </Link>
-          <button onClick={handleMarkLeft} style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 'var(--radius-full)', padding: '0 20px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontFamily: 'var(--font-body)' }}>
+          <button onClick={handleMarkLeft} style={{ flex: 1, background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 'var(--radius-full)', padding: '0 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontFamily: 'var(--font-body)' }}>
             <UserX size={16} /> Mark as Left
           </button>
         </div>

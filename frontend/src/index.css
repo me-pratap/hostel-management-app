@@ -268,11 +268,15 @@ body::after {
   }
   
   .main-content {
-    padding: 20px 16px 90px 16px !important;
+    margin-left: 0 !important;
+    padding: 0 !important;
+    padding-bottom: 90px !important;
   }
   
   .glass-panel {
     padding: 20px 16px !important;
+    border: none;
+    border-radius: 0;
   }
   
   .stat-card {
