@@ -10,36 +10,43 @@ const SidebarItem = ({ icon: Icon, label, to, onClick, isCollapsed }: { icon: an
   const style = {
     display: 'flex',
     alignItems: 'center',
-    gap: '14px',
-    padding: isCollapsed ? '14px' : '14px 20px',
+    gap: isCollapsed ? '0' : '14px',
+    padding: isCollapsed ? '14px 0' : '14px 20px',
     justifyContent: isCollapsed ? 'center' : 'flex-start',
     borderRadius: '16px',
     color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
     background: isActive ? 'var(--accent-glow)' : 'transparent',
     border: isActive ? '1px solid var(--accent-primary)' : '1px solid transparent',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    transition: 'all 0.3s ease',
     marginBottom: '12px',
     fontWeight: isActive ? 600 : 500,
     cursor: 'pointer',
     width: '100%',
-    textAlign: 'left' as const,
-    fontFamily: 'inherit',
-    fontSize: 'inherit'
+    textDecoration: 'none',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap' as const
   };
+
+  const content = (
+    <>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '24px' }}>
+        <Icon size={22} color={isActive ? 'var(--accent-primary)' : 'currentColor'} strokeWidth={isActive ? 2.5 : 2} />
+      </div>
+      {!isCollapsed && <span style={{ transition: 'opacity 0.3s ease' }}>{label}</span>}
+    </>
+  );
 
   if (onClick) {
     return (
       <button onClick={onClick} style={{ ...style, border: 'none', background: 'transparent' }} className="sidebar-btn" title={label}>
-        <Icon size={22} color="currentColor" strokeWidth={2} />
-        {!isCollapsed && label}
+        {content}
       </button>
     );
   }
   
   return (
     <Link to={to!} style={style} title={label}>
-      <Icon size={22} color={isActive ? 'var(--accent-primary)' : 'currentColor'} strokeWidth={isActive ? 2.5 : 2} />
-      {!isCollapsed && label}
+      {content}
     </Link>
   );
 };
@@ -69,7 +76,7 @@ export const Layout = () => {
           style={{
             position: 'absolute',
             right: '-16px',
-            top: '40px',
+            top: '48px',
             width: '32px',
             height: '32px',
             borderRadius: '50%',
@@ -86,23 +93,31 @@ export const Layout = () => {
           {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
 
-        <div style={{ padding: isCollapsed ? '0 0 40px' : '0 12px 40px', display: 'flex', justifyContent: isCollapsed ? 'center' : 'space-between', alignItems: 'center', flexDirection: isCollapsed ? 'column' : 'row', gap: isCollapsed ? '16px' : '0' }}>
+        <div style={{ 
+          padding: isCollapsed ? '0 0 32px' : '0 12px 32px', 
+          display: 'flex', 
+          justifyContent: isCollapsed ? 'center' : 'space-between', 
+          alignItems: 'center', 
+          flexDirection: isCollapsed ? 'column' : 'row', 
+          gap: isCollapsed ? '24px' : '0' 
+        }}>
           {!isCollapsed ? (
             <div>
-              <h2 style={{ fontSize: '1.5rem', margin: 0, color: 'var(--text-primary)' }}>Hostel OS</h2>
-              <p style={{ fontSize: '0.875rem', color: 'var(--accent-primary)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Management</p>
+              <h2 style={{ fontSize: '1.5rem', margin: 0, color: 'var(--text-primary)', lineHeight: 1.2 }}>Hostel OS</h2>
+              <p style={{ fontSize: '0.875rem', color: 'var(--accent-primary)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', margin: 0 }}>Management</p>
             </div>
           ) : (
             <div style={{
               width: '40px', height: '40px', borderRadius: '12px',
               background: 'var(--accent-primary)', color: 'white',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 'bold', fontSize: '1.2rem'
+              fontWeight: 'bold', fontSize: '1.2rem',
+              flexShrink: 0
             }}>
               H
             </div>
           )}
-          <button className="btn-icon" onClick={toggleTheme} aria-label="Toggle theme" title="Toggle theme" style={isCollapsed ? { width: '40px', height: '40px' } : {}}>
+          <button className="btn-icon" onClick={toggleTheme} aria-label="Toggle theme" title="Toggle theme" style={isCollapsed ? { width: '40px', height: '40px', flexShrink: 0 } : {}}>
             {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
           </button>
         </div>

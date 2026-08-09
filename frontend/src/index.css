@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 :root {
   /* ============================
      NOVEL LIGHT MODE (Editorial Warm)
@@ -154,8 +158,8 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
   transition: all 0.4s ease;
-  overflow: hidden;
   position: relative;
+  z-index: 100;
 }
 
 .sidebar.collapsed {
