@@ -212,7 +212,7 @@ export const TenantProfile = () => {
       </div>
 
       {/* Details Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+      <div className="grid-2-cols">
         {/* Personal Information */}
         <div className="form-section">
           <div className="form-section-title">Personal Information</div>

@@ -134,9 +134,24 @@ export const Layout = () => {
         </div>
       </aside>
       
-      <main className="main-content">
-        <div className="glass-panel" style={{ padding: '40px', minHeight: 'calc(100vh - 80px)' }}>
-          <Outlet />
+      <main className="main-content" style={{ padding: 0, display: 'flex', flexDirection: 'column' }}>
+        <div className="mobile-header">
+          <div>
+            <h2 style={{ fontSize: '1.25rem', margin: 0, color: 'var(--text-primary)', lineHeight: 1.2 }}>Hostel OS</h2>
+          </div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button className="btn-icon" onClick={toggleTheme} aria-label="Toggle theme" style={{ width: '36px', height: '36px' }}>
+              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+            </button>
+            <button className="btn-icon" onClick={logout} aria-label="Logout" style={{ width: '36px', height: '36px', color: '#ef4444', borderColor: 'transparent' }}>
+              <LogOut size={18} />
+            </button>
+          </div>
+        </div>
+        <div style={{ flex: 1, overflowY: 'auto' }} className="main-scroll">
+          <div className="glass-panel" style={{ minHeight: 'calc(100vh - 80px)' }}>
+            <Outlet />
+          </div>
         </div>
       </main>
     </div>

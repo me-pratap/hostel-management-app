@@ -128,7 +128,7 @@ export const AddTenant = () => {
         {/* SECTION 0: Photos */}
         <div className="form-section">
           <div className="form-section-title">Photos</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+          <div className="grid-2-cols">
             <PhotoUploadBox label="Profile Photo" preview={photoPreview} onChange={(e) => handleFileChange(e, 'photo')} />
             <PhotoUploadBox label="Aadhar Card Photo" preview={aadharPreview} onChange={(e) => handleFileChange(e, 'aadhar')} />
           </div>
@@ -137,7 +137,7 @@ export const AddTenant = () => {
         {/* SECTION 1: Personal Info */}
         <div className="form-section">
           <div className="form-section-title">1. Personal Information</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px' }}>
+          <div className="grid-2-cols">
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label>Full Name *</label>
               <input required name="full_name" value={formData.full_name} onChange={handleChange} placeholder="e.g. John Doe" />
@@ -172,7 +172,7 @@ export const AddTenant = () => {
         {/* SECTION 2: Contacts */}
         <div className="form-section">
           <div className="form-section-title">2. Contact & Emergency</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px' }}>
+          <div className="grid-2-cols">
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label>Primary Contact Number *</label>
               <input required name="contact_number" value={formData.contact_number} onChange={handleChange} placeholder="+91 XXXXX XXXXX" />
@@ -208,7 +208,7 @@ export const AddTenant = () => {
         {/* SECTION 3: Hostel Details */}
         <div className="form-section">
           <div className="form-section-title">3. Hostel & Rent Details</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px' }}>
+          <div className="grid-2-cols">
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label>Assign Room *</label>
               <select required name="room_id" value={formData.room_id} onChange={handleChange}>

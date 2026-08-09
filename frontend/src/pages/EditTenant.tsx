@@ -182,7 +182,7 @@ export const EditTenant = () => {
         {/* Photos */}
         <div className="form-section">
           <div className="form-section-title">Photos</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+          <div className="grid-2-cols">
             <PhotoUploadBox label="Profile Photo" preview={photoPreview} onChange={(e) => handleFileChange(e, 'photo')} />
             <PhotoUploadBox label="Aadhar Card Photo" preview={aadharPreview} onChange={(e) => handleFileChange(e, 'aadhar')} />
           </div>
@@ -191,7 +191,7 @@ export const EditTenant = () => {
         {/* Personal Information */}
         <div className="form-section">
           <div className="form-section-title">Personal Information</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px' }}>
+          <div className="grid-2-cols">
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label>Full Name *</label>
               <input required name="full_name" value={formData.full_name} onChange={handleChange} />
@@ -230,7 +230,7 @@ export const EditTenant = () => {
         {/* Contacts */}
         <div className="form-section">
           <div className="form-section-title">Contact & Emergency</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px' }}>
+          <div className="grid-2-cols">
             <div className="form-group">
               <label>Primary Contact *</label>
               <input required name="contact_number" value={formData.contact_number} onChange={handleChange} />
@@ -269,7 +269,7 @@ export const EditTenant = () => {
         {/* Hostel Details */}
         <div className="form-section">
           <div className="form-section-title">Hostel & Rent</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px' }}>
+          <div className="grid-2-cols">
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label>Assign Room *</label>
               <select required name="room_id" value={formData.room_id} onChange={handleChange}>
