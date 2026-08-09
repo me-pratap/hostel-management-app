@@ -179,14 +179,29 @@ async def upload_photo(file: UploadFile = File(...)):
     if file.content_type not in allowed_types:
         raise HTTPException(status_code=400, detail="Only JPEG, PNG, and WebP images are allowed")
 
-    # Generate unique filename
-    ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
-    filename = f"{uuid.uuid4()}.{ext}"
-    filepath = os.path.join(UPLOAD_DIR, filename)
-
-    # Save file
     contents = await file.read()
-    with open(filepath, "wb") as f:
-        f.write(contents)
+    
+    from config import CLOUDINARY_CLOUD_NAME
+    if CLOUDINARY_CLOUD_NAME:
+        import cloudinary.uploader
+        try:
+            # Upload to Cloudinary
+            upload_result = cloudinary.uploader.upload(
+                contents,
+                resource_type="image",
+                folder="hostel_management_uploads"
+            )
+            return {"url": upload_result.get("secure_url"), "filename": upload_result.get("public_id")}
+        except Exception as e:
+            print(f"[ERROR] Cloudinary upload failed: {e}")
+            raise HTTPException(status_code=500, detail="Failed to upload image to Cloudinary")
+    else:
+        # Fallback to local upload
+        ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+        filename = f"{uuid.uuid4()}.{ext}"
+        filepath = os.path.join(UPLOAD_DIR, filename)
 
-    return {"url": f"/uploads/{filename}", "filename": filename}
+        with open(filepath, "wb") as f:
+            f.write(contents)
+
+        return {"url": f"/uploads/{filename}", "filename": filename}
