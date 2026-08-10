@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Upload } from 'lucide-react';
 import apiClient, { getImageUrl } from '../api/client';
 
 export const EditTenant = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [rooms, setRooms] = useState<any[]>([]);
@@ -134,6 +136,8 @@ export const EditTenant = () => {
       });
 
       await apiClient.put(`/tenants/${id}`, payload);
+      await queryClient.invalidateQueries({ queryKey: ['tenant', id] });
+      await queryClient.invalidateQueries({ queryKey: ['tenants'] });
       navigate(`/tenants/${id}`);
     } catch (err: any) {
       alert(err.response?.data?.detail || 'Failed to update');

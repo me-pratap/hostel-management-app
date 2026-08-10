@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Users, Home, DoorOpen, DoorClosed } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import apiClient from '../api/client';
 
 interface DashboardStats {
@@ -10,30 +11,20 @@ interface DashboardStats {
 }
 
 export const Dashboard = () => {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: stats, isLoading, error } = useQuery({
+    queryKey: ['dashboard'],
+    queryFn: async () => {
+      const response = await apiClient.get<DashboardStats>('/dashboard');
+      return response.data;
+    }
+  });
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await apiClient.get<DashboardStats>('/dashboard');
-        setStats(response.data);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load dashboard data');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return <div style={{ color: 'var(--text-muted)' }}>Loading dashboard...</div>;
   }
 
   if (error) {
-    return <div style={{ color: '#ef4444' }}>Error: {error}</div>;
+    return <div style={{ color: '#ef4444' }}>Error loading dashboard data</div>;
   }
 
   return (

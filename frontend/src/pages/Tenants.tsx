@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { UserPlus, Phone, Home, FileText } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import apiClient, { getImageUrl } from '../api/client';
 
 interface Tenant {
@@ -15,23 +16,15 @@ interface Tenant {
 }
 
 export const Tenants = () => {
-  const [tenants, setTenants] = useState<Tenant[]>([]);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchTenants = async () => {
-      try {
-        const res = await apiClient.get<Tenant[]>('/tenants?is_active=true');
-        setTenants(res.data);
-      } catch (err) {
-        console.error('Failed to fetch tenants', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTenants();
-  }, []);
+  const { data: tenants = [], isLoading: loading } = useQuery({
+    queryKey: ['tenants'],
+    queryFn: async () => {
+      const res = await apiClient.get<Tenant[]>('/tenants?is_active=true');
+      return res.data;
+    }
+  });
 
   if (loading) {
     return <div style={{ color: 'var(--text-muted)' }}>Loading tenants...</div>;

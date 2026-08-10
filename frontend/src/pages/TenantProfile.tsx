@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft, Edit, Phone, MapPin, Calendar, CreditCard,
   Shield, MessageCircle, UserX, Upload, FileText, Heart,
@@ -45,28 +46,22 @@ interface TenantData {
 export const TenantProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [tenant, setTenant] = useState<TenantData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  
   const [sendingReminder, setSendingReminder] = useState(false);
   const [reminderResult, setReminderResult] = useState<string | null>(null);
   const [showAadhar, setShowAadhar] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [uploadingAadhar, setUploadingAadhar] = useState(false);
 
-  const fetchTenant = async () => {
-    try {
+  const { data: tenant, isLoading: loading } = useQuery({
+    queryKey: ['tenant', id],
+    queryFn: async () => {
       const res = await apiClient.get(`/tenants/${id}`);
-      setTenant(res.data);
-    } catch (err) {
-      console.error('Failed to fetch tenant', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTenant();
-  }, [id]);
+      return res.data;
+    },
+    enabled: !!id
+  });
 
   const handleSendReminder = () => {
     if (!tenant || !tenant.contact_number) return;
@@ -112,7 +107,7 @@ export const TenantProfile = () => {
       const url = uploadRes.data.url;
       const field = type === 'photo' ? 'photo_url' : 'aadhar_photo_url';
       await apiClient.put(`/tenants/${tenant.tenant_id}`, { [field]: url });
-      await fetchTenant();
+      await queryClient.invalidateQueries({ queryKey: ['tenant', id] });
     } catch (err) {
       alert('Upload failed');
     } finally {

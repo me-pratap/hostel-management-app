@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { IndianRupee, AlertCircle, RefreshCw, CheckCircle2, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import apiClient from '../api/client';
@@ -29,36 +30,28 @@ interface PaymentRecord {
 }
 
 export const Payments = () => {
-  const [summary, setSummary] = useState<PaymentSummary | null>(null);
-  const [ledger, setLedger] = useState<PaymentRecord[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [generating, setGenerating] = useState(false);
 
-  const fetchPaymentsData = async () => {
-    try {
-      setLoading(true);
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ['payments'],
+    queryFn: async () => {
       const [summaryRes, ledgerRes] = await Promise.all([
         apiClient.get<PaymentSummary>('/payments/summary'),
         apiClient.get<PaymentRecord[]>('/payments/current-month')
       ]);
-      setSummary(summaryRes.data);
-      setLedger(ledgerRes.data);
-    } catch (err) {
-      console.error('Failed to fetch payments data', err);
-    } finally {
-      setLoading(false);
+      return { summary: summaryRes.data, ledger: ledgerRes.data };
     }
-  };
+  });
 
-  useEffect(() => {
-    fetchPaymentsData();
-  }, []);
+  const summary = data?.summary || null;
+  const ledger = data?.ledger || [];
 
   const handleGenerateInvoices = async () => {
     try {
       setGenerating(true);
       await apiClient.post('/payments/generate-monthly');
-      await fetchPaymentsData();
+      await queryClient.invalidateQueries({ queryKey: ['payments'] });
       alert('Monthly invoices generated successfully for all active tenants.');
     } catch (err) {
       console.error('Failed to generate invoices', err);
@@ -97,7 +90,7 @@ export const Payments = () => {
       await apiClient.post(`/payments/${payment.payment_id}/record`, {
         amount_paid: amount
       });
-      fetchPaymentsData(); // refresh data
+      await queryClient.invalidateQueries({ queryKey: ['payments'] });
     } catch (err) {
       console.error('Failed to record payment', err);
       alert('Failed to record payment.');

@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Home, Users, ArrowRight, User, Phone, CreditCard, ChevronDown, ChevronUp } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import apiClient from '../api/client';
 import { Link } from 'react-router-dom';
 
@@ -19,40 +20,35 @@ interface FloorPlan {
 }
 
 export const Rooms = () => {
-  const [floorPlan, setFloorPlan] = useState<FloorPlan | null>(null);
-  const [loading, setLoading] = useState(true);
   const [expandedRoomId, setExpandedRoomId] = useState<string | null>(null);
-  const [roomDetails, setRoomDetails] = useState<Record<string, any>>({});
+  
+  const { data: floorPlan, isLoading: loading } = useQuery({
+    queryKey: ['rooms'],
+    queryFn: async () => {
+      const res = await apiClient.get<FloorPlan>('/rooms/floor-plan');
+      return res.data;
+    }
+  });
 
-  const handleRoomClick = async (roomId: string) => {
+  const { data: expandedRoomData } = useQuery({
+    queryKey: ['room', expandedRoomId],
+    queryFn: async () => {
+      if (!expandedRoomId) return null;
+      const res = await apiClient.get(`/rooms/${expandedRoomId}`);
+      return res.data;
+    },
+    enabled: !!expandedRoomId
+  });
+
+  const handleRoomClick = (roomId: string) => {
     if (expandedRoomId === roomId) {
       setExpandedRoomId(null);
-      return;
-    }
-    setExpandedRoomId(roomId);
-    if (!roomDetails[roomId]) {
-      try {
-        const res = await apiClient.get(`/rooms/${roomId}`);
-        setRoomDetails(prev => ({ ...prev, [roomId]: res.data }));
-      } catch (err) {
-        console.error('Failed to fetch room details', err);
-      }
+    } else {
+      setExpandedRoomId(roomId);
     }
   };
 
-  useEffect(() => {
-    const fetchRooms = async () => {
-      try {
-        const res = await apiClient.get<FloorPlan>('/rooms/floor-plan');
-        setFloorPlan(res.data);
-      } catch (err) {
-        console.error('Failed to fetch rooms', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchRooms();
-  }, []);
+  const roomDetails = expandedRoomId && expandedRoomData ? { [expandedRoomId]: expandedRoomData } : {};
 
   if (loading) {
     return <div style={{ color: 'var(--text-muted)' }}>Loading rooms...</div>;

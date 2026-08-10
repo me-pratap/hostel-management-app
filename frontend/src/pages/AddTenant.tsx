@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Upload } from 'lucide-react';
 import apiClient from '../api/client';
 
 export const AddTenant = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
-  const [rooms, setRooms] = useState<any[]>([]);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [aadharPreview, setAadharPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -30,17 +31,13 @@ export const AddTenant = () => {
     police_verification_status: 'pending'
   });
 
-  useEffect(() => {
-    const fetchRooms = async () => {
-      try {
-        const res = await apiClient.get('/rooms');
-        setRooms(res.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchRooms();
-  }, []);
+  const { data: rooms = [] } = useQuery({
+    queryKey: ['rooms-list'],
+    queryFn: async () => {
+      const res = await apiClient.get('/rooms');
+      return res.data;
+    }
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -86,6 +83,7 @@ export const AddTenant = () => {
       }
 
       await apiClient.post('/tenants', payload);
+      await queryClient.invalidateQueries({ queryKey: ['tenants'] });
       navigate('/tenants');
     } catch (err: any) {
       alert(err.response?.data?.detail || 'Failed to add tenant');
@@ -213,7 +211,7 @@ export const AddTenant = () => {
               <label>Assign Room *</label>
               <select required name="room_id" value={formData.room_id} onChange={handleChange}>
                 <option value="" disabled>Select a room</option>
-                {rooms.filter(r => r.room_type === 'rent').map(r => (
+                {rooms.filter((r: any) => r.room_type === 'rent').map((r: any) => (
                   <option key={r.room_id} value={r.room_id}>
                     Room {r.room_number} (Floor: {r.floor})
                   </option>
