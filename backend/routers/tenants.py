@@ -168,7 +168,13 @@ async def mark_tenant_left(tenant_id: str):
         {"$pull": {"occupant_ids": tenant_id}}
     )
 
-    return {"message": "Tenant marked as left", "date_left": now.strftime("%Y-%m-%d")}
+    # Delete any unpaid payments for this tenant so they don't clutter the ledger
+    await db.payments.delete_many({
+        "tenant_id": tenant_id,
+        "status": "unpaid"
+    })
+
+    return {"message": "Tenant marked as left and unpaid payments cleared", "date_left": now.strftime("%Y-%m-%d")}
 
 
 @router.post("/upload-photo")
