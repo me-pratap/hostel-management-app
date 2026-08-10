@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { IndianRupee, AlertCircle, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { IndianRupee, AlertCircle, RefreshCw, CheckCircle2, MessageCircle } from 'lucide-react';
 import apiClient from '../api/client';
 
 interface PaymentSummary {
@@ -66,6 +66,20 @@ export const Payments = () => {
     }
   };
 
+  const handleSendWhatsApp = (record: PaymentRecord, isThankYou: boolean) => {
+    const firstContact = (record.contact_number || '').split(/[,/|]/)[0];
+    let digits = firstContact.replace(/\D/g, '');
+    if (digits.length === 11 && digits.startsWith('0')) digits = digits.substring(1);
+    const waNumber = digits.length === 10 ? `91${digits}` : digits;
+
+    const message = isThankYou 
+      ? `Hi ${record.tenant_name}, we have received your rent payment. Thank you!`
+      : `Hi ${record.tenant_name}, this is a reminder that your rent of ₹${record.amount_due} was due on the ${new Date(record.due_date).getDate()}th of the month. Please make the payment.`;
+    
+    const url = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+  };
+
   const handleRecordPayment = async (payment: PaymentRecord) => {
     // Basic prompt for quick demo - can be replaced with a modal later
     const amountStr = prompt(`Enter amount paid (Total due: ₹${payment.amount_due}):`, payment.amount_due.toString());
@@ -82,18 +96,6 @@ export const Payments = () => {
         amount_paid: amount
       });
       fetchPaymentsData(); // refresh data
-
-      // Free WhatsApp Confirmation Link
-      if (confirm('Payment recorded successfully! Do you want to send a WhatsApp confirmation?')) {
-        const firstContact = (payment.contact_number || '').split(/[,/|]/)[0];
-        let digits = firstContact.replace(/\D/g, '');
-        if (digits.length === 11 && digits.startsWith('0')) digits = digits.substring(1);
-        const waNumber = digits.length === 10 ? `91${digits}` : digits;
-
-        const message = `Hi ${payment.tenant_name}, we have received your rent payment of ₹${amount}. Thank you!`;
-        const url = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
-        window.open(url, '_blank');
-      }
     } catch (err) {
       console.error('Failed to record payment', err);
       alert('Failed to record payment.');
@@ -207,9 +209,15 @@ export const Payments = () => {
                       <tr key={record.payment_id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                         <td style={{ padding: '16px 24px' }}>
                           <div style={{ fontWeight: 600 }}>{record.tenant_name}</div>
-                          <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{record.contact_number}</div>
+                          <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                            <a href={`tel:${record.contact_number}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                              {record.contact_number}
+                            </a>
+                          </div>
                         </td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text-secondary)' }}>{record.due_date}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                          {new Date(record.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </td>
                         <td style={{ padding: '16px 24px', fontWeight: 600 }}>₹{record.amount_due}</td>
                         <td style={{ padding: '16px 24px' }}>
                           <span style={{
@@ -225,26 +233,46 @@ export const Payments = () => {
                           </span>
                         </td>
                         <td style={{ padding: '16px 24px' }}>
-                          {record.status === 'paid' ? (
-                            <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.875rem', fontWeight: 500 }}>
-                              <CheckCircle2 size={16} /> Settled
-                            </span>
-                          ) : (
-                            <button 
-                              onClick={() => handleRecordPayment(record)}
-                              style={{
-                                background: 'transparent',
-                                border: '1px solid var(--accent-primary)',
-                                color: 'var(--accent-primary)',
-                                padding: '6px 16px',
-                                borderRadius: 'var(--radius-full)',
-                                fontSize: '0.875rem',
-                                fontWeight: 600
-                              }}
-                            >
-                              Record Payment
-                            </button>
-                          )}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {record.status === 'paid' ? (
+                              <>
+                                <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.875rem', fontWeight: 500 }}>
+                                  <CheckCircle2 size={16} /> Settled
+                                </span>
+                                <button 
+                                  onClick={() => handleSendWhatsApp(record, true)}
+                                  title="Send Thank You"
+                                  style={{ background: 'transparent', border: 'none', color: '#10b981', cursor: 'pointer', padding: '4px', display: 'flex' }}
+                                >
+                                  <MessageCircle size={18} />
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button 
+                                  onClick={() => handleRecordPayment(record)}
+                                  style={{
+                                    background: 'transparent',
+                                    border: '1px solid var(--accent-primary)',
+                                    color: 'var(--accent-primary)',
+                                    padding: '6px 16px',
+                                    borderRadius: 'var(--radius-full)',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600
+                                  }}
+                                >
+                                  Record Payment
+                                </button>
+                                <button 
+                                  onClick={() => handleSendWhatsApp(record, false)}
+                                  title="Send Reminder"
+                                  style={{ background: 'transparent', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', padding: '4px', display: 'flex' }}
+                                >
+                                  <MessageCircle size={18} />
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
