@@ -125,7 +125,9 @@ export const Rooms = () => {
                             <User size={20} />
                           </div>
                           <div>
-                            <div style={{ fontWeight: 600, fontSize: '1rem' }}>{tenant.full_name}</div>
+                            <Link to={`/tenants/${tenant.tenant_id}`} style={{ fontWeight: 600, fontSize: '1rem', color: 'inherit', textDecoration: 'none' }}>
+                              {tenant.full_name}
+                            </Link>
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ID: {tenant.tenant_id.substring(0,8)}</div>
                           </div>
                         </div>

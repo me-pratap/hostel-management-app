@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { IndianRupee, AlertCircle, RefreshCw, CheckCircle2, MessageCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import apiClient from '../api/client';
 
 interface PaymentSummary {
@@ -208,7 +209,9 @@ export const Payments = () => {
                     {records.map((record) => (
                       <tr key={record.payment_id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                         <td style={{ padding: '16px 24px' }}>
-                          <div style={{ fontWeight: 600 }}>{record.tenant_name}</div>
+                          <Link to={`/tenants/${record.tenant_id}`} style={{ fontWeight: 600, color: 'inherit', textDecoration: 'none' }}>
+                            {record.tenant_name}
+                          </Link>
                           <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
                             <a href={`tel:${record.contact_number}`} style={{ color: 'inherit', textDecoration: 'none' }}>
                               {record.contact_number}
