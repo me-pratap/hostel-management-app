@@ -25,6 +25,7 @@ interface PaymentRecord {
   amount_paid: number;
   status: string;
   due_date: string;
+  payment_date?: string;
 }
 
 export const Payments = () => {
@@ -74,7 +75,7 @@ export const Payments = () => {
     const waNumber = digits.length === 10 ? `91${digits}` : digits;
 
     const message = isThankYou 
-      ? `Hi ${record.tenant_name}, we have received your rent payment. Thank you!`
+      ? `Hi ${record.tenant_name}, we have received your rent payment of ₹${record.amount_paid || record.amount_due}. Thank you!`
       : `Hi ${record.tenant_name}, this is a reminder that your rent of ₹${record.amount_due} was due on the ${new Date(record.due_date).getDate()}th of the month. Please make the payment.`;
     
     const url = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
@@ -199,7 +200,7 @@ export const Payments = () => {
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--border-strong)', color: 'var(--text-muted)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       <th style={{ padding: '16px 24px' }}>Tenant</th>
-                      <th style={{ padding: '16px 24px' }}>Due Date</th>
+                      <th style={{ padding: '16px 24px' }}>Dates</th>
                       <th style={{ padding: '16px 24px' }}>Amount Due</th>
                       <th style={{ padding: '16px 24px' }}>Status</th>
                       <th style={{ padding: '16px 24px' }}>Action</th>
@@ -219,7 +220,12 @@ export const Payments = () => {
                           </div>
                         </td>
                         <td style={{ padding: '16px 24px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
-                          {new Date(record.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          <div>Due: {new Date(record.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                          {record.payment_date && (
+                            <div style={{ color: 'var(--text-primary)', marginTop: '4px' }}>
+                              Paid: {new Date(record.payment_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </div>
+                          )}
                         </td>
                         <td style={{ padding: '16px 24px', fontWeight: 600 }}>₹{record.amount_due}</td>
                         <td style={{ padding: '16px 24px' }}>
