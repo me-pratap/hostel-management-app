@@ -69,10 +69,16 @@ export const TenantProfile = () => {
   }, [id]);
 
   const handleSendReminder = () => {
-    if (!tenant) return;
-    const phone = tenant.contact_number.replace(/\D/g, '');
-    // Usually Indian numbers need 91 prefix if not already present
-    const waNumber = phone.length === 10 ? `91${phone}` : phone;
+    if (!tenant || !tenant.contact_number) return;
+    
+    // Extract first phone number in case they entered multiple
+    const firstContact = tenant.contact_number.split(/[,/|]/)[0];
+    let digits = firstContact.replace(/\D/g, '');
+    
+    // Handle Indian formats
+    if (digits.length === 11 && digits.startsWith('0')) digits = digits.substring(1);
+    const waNumber = digits.length === 10 ? `91${digits}` : digits;
+
     const message = `Hi ${tenant.full_name}, this is a reminder that your rent of ₹${tenant.monthly_rent_amount} was due on the ${tenant.rent_due_day}th of the month. Please make the payment.`;
     const url = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');

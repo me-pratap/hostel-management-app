@@ -85,8 +85,11 @@ export const Payments = () => {
 
       // Free WhatsApp Confirmation Link
       if (confirm('Payment recorded successfully! Do you want to send a WhatsApp confirmation?')) {
-        const phone = payment.contact_number.replace(/\D/g, '');
-        const waNumber = phone.length === 10 ? `91${phone}` : phone;
+        const firstContact = (payment.contact_number || '').split(/[,/|]/)[0];
+        let digits = firstContact.replace(/\D/g, '');
+        if (digits.length === 11 && digits.startsWith('0')) digits = digits.substring(1);
+        const waNumber = digits.length === 10 ? `91${digits}` : digits;
+
         const message = `Hi ${payment.tenant_name}, we have received your rent payment of ₹${amount}. Thank you!`;
         const url = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
         window.open(url, '_blank');
