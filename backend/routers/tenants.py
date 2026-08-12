@@ -134,6 +134,33 @@ async def update_tenant(tenant_id: str, updates: TenantUpdate):
         {"$set": update_data}
     )
 
+    # Sync rent_due_day and monthly_rent_amount to the CURRENT month's unpaid/partial invoice
+    if "rent_due_day" in update_data or "monthly_rent_amount" in update_data:
+        import calendar
+        now = datetime.utcnow()
+        current_month = now.strftime("%Y-%m")
+        year = now.year
+        month = now.month
+        
+        payment_update = {}
+        if "monthly_rent_amount" in update_data:
+            payment_update["amount_due"] = update_data["monthly_rent_amount"]
+        if "rent_due_day" in update_data:
+            rent_due_day = update_data["rent_due_day"]
+            max_day = calendar.monthrange(year, month)[1]
+            due_day = min(rent_due_day, max_day)
+            payment_update["due_date"] = f"{year}-{month:02d}-{due_day:02d}"
+            
+        if payment_update:
+            await db.payments.update_one(
+                {
+                    "tenant_id": tenant_id,
+                    "month_year": current_month,
+                    "status": {"$in": ["unpaid", "partial"]}
+                },
+                {"$set": payment_update}
+            )
+
     updated = await db.tenants.find_one({"tenant_id": tenant_id})
     updated.pop("_id", None)
     return updated
