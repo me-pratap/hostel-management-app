@@ -138,6 +138,17 @@ async def record_payment(payment_id: str, data: RecordPaymentRequest):
 
     return updated
 
+@router.delete("/{payment_id}")
+async def delete_payment(payment_id: str):
+    """Delete a payment record manually."""
+    db = get_db()
+    
+    result = await db.payments.delete_one({"payment_id": payment_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Payment record not found")
+        
+    return {"message": "Payment record deleted successfully"}
+
 
 @router.post("/generate-monthly")
 async def generate_monthly_payments():
